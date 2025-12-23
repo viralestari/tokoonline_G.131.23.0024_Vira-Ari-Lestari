@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,7 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Spatie\FilamentMediaLibrary\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ProductResource extends Resource
 {
@@ -36,12 +35,28 @@ class ProductResource extends Resource
                     ->numeric()
                     ->prefix('Rp'),
                 Forms\Components\DatePicker::make('tanggal_masuk')
-                    ->label('product_date')
+                    ->label("Product Date")
                     ->required(),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric(),
-                SpatieMediaLibraryFileUpload::make('product_image')
+                Forms\Components\Select::make('categories')
+                    ->relationship('categories', 'category_name')
+                    ->multiple()
+                    ->preload(),    
+                Forms\Components\Select::make('tags')
+                    ->relationship('tag', 'tag_name')
+                    ->preload(),    
+                Forms\Components\Textarea::make('product_description_short')
+                    ->label('Short Description')
+                    ->required()
+                    ->maxLength(65535),
+                Forms\Components\RichEditor::make('product_description_long')
+                    ->label('Long Description')
+                    ->nullable()
+                    ->required()
+                    ->columnSpanFull(),
+                Forms\Components\SpatieMediaLibraryFileUpload::make('product_image')
                     ->collection('products_image')
                     ->image()
                     ->required(),
@@ -67,6 +82,12 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('categories.category_name')
+                    ->badge()
+                    ->color('success'),
+                Tables\Columns\TextColumn::make('tag.tag_name')
+                    ->badge()
+                    ->color('primary'),    
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
